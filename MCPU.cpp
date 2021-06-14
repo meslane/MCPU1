@@ -85,24 +85,15 @@ void MCPU::execute(uint8_t instr) {
             if (this->Z == 1) {
                 doJump = true;
             }
-            else {
-                doJump = false;
-            }
         }
         if ((reg & 0b010) != 0) {
             if (this->N == 1) {
                 doJump = true;
             }
-            else {
-                doJump = false;
-            }
         }
         if ((reg & 0b100) != 0) {
             if (this->C == 1) {
                 doJump = true;
-            }
-            else {
-                doJump = false;
             }
         }
     }

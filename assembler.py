@@ -12,7 +12,12 @@ def detectInvalidChars(validChars, input):
     return False
     
 def printHex(data):
-    return True #TODO: implement
+    for i in range(0, len(data)):
+        if (i % 8 == 0):
+            print("\n0x{:04x}: ".format(i), end='')
+        print("{:02x} ".format(data[i]), end = '')
+        
+    print()
 
 inf = open(sys.argv[1], "r")
 
@@ -63,14 +68,35 @@ instList = (
 labelTable = {} #table for address labels
 
 n = 1
-for line in inData:
-    line = line.lower().split()
+for l in inData:
+    line = l.lower().split()
     
     if (len(line) > 0):
-        #invalid instruction
-        if (("label" not in line[0]) and (line[0] not in instList)):
-            print("ERROR: line {} - invalid macro '{}'".format(n, line[0]))
-            error()
+        if (l[0] == '"' or l[0] == "'"): #if string
+            l = l[1:]
+            for ch in l:
+                if (ch == '"' or ch == "'"):
+                    outData[dPointer] = 0 #null terminate
+                    dPointer += 1
+                    break
+                    
+                outData[dPointer] = ord(ch)
+                dPointer += 1
+        elif (line[0][0] == ';'): #if comment
+            pass
+        else:
+            try: #if int
+                if (int(line[0], 0) > 255 or int(line[0], 0) < -128):
+                    print("ERROR: line {} - immediate value of {} overflows one byte".format(n, line[0])) 
+                    error()
+                
+                outData[dPointer] = int(line[0], 0)
+                dPointer += 1
+            except ValueError:
+                #invalid instruction
+                if (("label" not in line[0]) and (line[0] not in instList)):
+                    print("ERROR: line {} - invalid macro '{}'".format(n, line[0]))
+                    error()
         
         #address labels
         if ("label" in line[0]):
@@ -86,7 +112,7 @@ for line in inData:
         
         #ALU and MOV ops + all ops greater than 25
         try:
-            if ((instList.index(line[0]) > 0 and instList.index(line[0]) < 15) or (instList.index(line[0]) > 25)):
+            if ((instList.index(line[0]) > 0 and instList.index(line[0]) < 16) or (instList.index(line[0]) > 25)):
                 opcode = instList.index(line[0])
                 reg = 0
                 
@@ -201,8 +227,12 @@ for line in inData:
 while(outData[-1] == 0):
     del outData[-1]
 
+printHex(outData)
+
 fArray = bytearray(outData)
 outf.write(fArray)
 
 inf.close()
 outf.close()
+
+print("\nSuccessfully wrote {} bytes to ROM file {}".format(len(fArray), outFileName))
