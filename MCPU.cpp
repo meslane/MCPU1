@@ -3,8 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h> 
 
-MCPU::MCPU(uint8_t* memory) {
+MCPU::MCPU(uint8_t* memory, uint8_t mode) {
     this->memory = memory;
+    this->mode = mode;
     
     PC = 0;
     
@@ -240,7 +241,17 @@ void MCPU::execute(uint8_t instr) {
             break;
         case 29: //ldo
             OUT = dataRegs[reg];
-            printf("%d ", OUT); //replace this later
+            switch(mode) {
+                case 0: //int
+                    printf("%d ", OUT);
+                    break;
+                case 1: //hex
+                    printf("%02x ", OUT);
+                    break;
+                case 2: //char
+                    printf("%c", OUT);
+                    break;
+            }
             break;
         case 30: //sti
             dataRegs[reg] = IN;

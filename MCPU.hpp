@@ -6,6 +6,7 @@
 class MCPU {
     public:
         uint8_t* memory; 
+        uint8_t mode;
         uint8_t dataRegs[8];
         
         uint8_t IN; //input register
@@ -23,7 +24,7 @@ class MCPU {
         void execute(uint8_t instr);
         
     //public:
-        MCPU(uint8_t* memory); 
+        MCPU(uint8_t* memory, uint8_t mode); 
         void run();
 };
 

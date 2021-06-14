@@ -65,6 +65,19 @@ instList = (
 "sti",
 "hcf")
 
+escChars = {
+    '0': 0,
+    'a': 7,
+    'b': 8,
+    't': 9,
+    'n': 10,
+    'v': 11,
+    'f': 12,
+    'r': 13,
+    'e': 27,
+    '\\': 92
+}
+
 labelTable = {} #table for address labels
 
 n = 1
@@ -72,20 +85,34 @@ for l in inData:
     line = l.lower().split()
     
     if (len(line) > 0):
-        if (l[0] == '"' or l[0] == "'"): #if string
+        #if string
+        if (l[0] == '"' or l[0] == "'"):
+            escapeChar = False
             l = l[1:]
             for ch in l:
                 if (ch == '"' or ch == "'"):
                     outData[dPointer] = 0 #null terminate
                     dPointer += 1
                     break
+                elif (ch == "\\" and escapeChar == False):
+                    escapeChar = True
+                elif (escapeChar == True):
+                    try:
+                        outData[dPointer] = escChars[ch]
+                        dPointer += 1
+                    except KeyError:
+                        pass
                     
-                outData[dPointer] = ord(ch)
-                dPointer += 1
-        elif (line[0][0] == ';'): #if comment
+                    escapeChar = False
+                else:
+                    outData[dPointer] = ord(ch)
+                    dPointer += 1
+        #if comment
+        elif (line[0][0] == ';'):
             pass
+        #if int
         else:
-            try: #if int
+            try:
                 if (int(line[0], 0) > 255 or int(line[0], 0) < -128):
                     print("ERROR: line {} - immediate value of {} overflows one byte".format(n, line[0])) 
                     error()

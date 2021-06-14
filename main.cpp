@@ -13,6 +13,8 @@ int main(int argc, char** argv) {
     uint8_t memory[65536];
     string allocation;
     uint16_t romSpace;
+    string modeString;
+    uint8_t mode;
     
     ifstream f(argv[1], ios::out | ios::binary);
     ifstream cfg("config.txt");
@@ -27,7 +29,9 @@ int main(int argc, char** argv) {
     }
     
     getline(cfg, allocation);
+    getline(cfg, modeString);
     romSpace = static_cast<uint16_t>(atoi(allocation.c_str()));
+    mode = static_cast<uint16_t>(atoi(modeString.c_str()));
     
     f.read((char*)&memory, romSpace);
     
@@ -38,7 +42,7 @@ int main(int argc, char** argv) {
     cfg.close();
     
     cout << "Starting simulator:" << endl << endl;
-    MCPU cpu(memory);
+    MCPU cpu(memory, mode);
     
     cpu.run();
     
