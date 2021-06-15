@@ -102,6 +102,17 @@ for l in inData: #pre-assign address labels
                 else:
                     dPointer += 1
                     break
+        #if arrray
+        elif (l[0] == '['):
+            array = l.replace(',', ' ').replace('[', '').replace(']', '').split()
+            
+            for entry in array:
+                try:
+                    if (int(entry, 0)):
+                        dPointer += 1
+                except ValueError:
+                    break
+                  
         #ints
         try:
             if (int(line[0], 0)):
@@ -159,6 +170,22 @@ for l in inData: #write data
                 else:
                     outData[dPointer] = ord(ch)
                     dPointer += 1
+        #if arrray
+        elif (l[0] == '['):
+            array = l.replace(',', ' ').replace('[', '').replace(']', '').split()
+            
+            for entry in array:
+                try:
+                    if (int(entry, 0) > 255 or int(entry, 0) < -128):
+                        print("ERROR: line {} - immediate value of {} overflows one byte".format(n, line[0])) 
+                        error()
+                    
+                    outData[dPointer] = int(entry, 0)
+                    dPointer += 1
+                except ValueError:
+                    print("ERROR: line {} - array entry '{}' is of non-integer type".format(n, entry)) 
+                    error()
+                
         #if comment
         elif (line[0][0] == ';'):
             pass
