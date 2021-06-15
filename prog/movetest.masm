@@ -1,0 +1,6 @@
+ldi a 2
+ldi c 3
+mvc b 
+mva d
+ldo b
+hcf

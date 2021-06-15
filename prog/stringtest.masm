@@ -1,0 +1,26 @@
+jpd 0 start
+
+label string 0x3
+"daisy daisy, give me your answer do\n"
+
+label halt
+hcf
+
+label print
+ldi b 1
+ldi c 0 
+ldx a
+label loop
+ldo a ;output char
+mvh a ;move lsb of index to a
+add b ;add 1
+mva h ;move back
+ldx a ;load next char
+add c ;add to 0 to test
+jpd z halt ;halt if null terminated
+jpd 0 loop ;loop if not
+
+label start
+ldi g 0
+ldi h 0x3 ;load index register with start of string
+jpd 0 print ;go to print

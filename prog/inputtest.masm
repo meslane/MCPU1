@@ -1,0 +1,17 @@
+label start
+ldi b 0
+ldi c 13 ;carrage return
+label loop
+sti a
+add b ;add b to a to test
+jpd z loop ;loop if zero
+ldo a ;output if not
+sub c ;test if 13
+jpd z newline
+jpd 0 loop
+
+label newline
+ldi a 10
+ldo a
+ldi a 0
+jpd 0 start

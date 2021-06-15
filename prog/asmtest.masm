@@ -1,0 +1,11 @@
+label end 0xf
+hcf
+
+label start 0x0 
+ldi A 0
+ldi B 1
+label add
+add B
+ldo A
+jpd zc end
+jpd 0 add
