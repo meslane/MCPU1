@@ -289,9 +289,12 @@ void MCPU::run() {
     uint8_t prevIN = 255; //input register
     uint8_t prevOUT = 255; //output register
     uint16_t prevSP = 65535; //call stack pointer
+    uint8_t pZ; //zero
+    uint8_t pN; //negative
+    uint8_t pC; //carry
     
     bool run = true;
-    ofile << "Cycle     |A |B |C |D |E |F |G |H |IN|OT| SP | PC |" << std::endl;
+    ofile << "Cycle     | A| B| C| D| E| F| G| H|IN|OT|CNZ| SP | PC |" << std::endl;
     while (run) {
         if (kbhit()) { //if key is pressed
             keypress = _getch();
@@ -303,13 +306,16 @@ void MCPU::run() {
         run = execute(memory[PC]);
         
         /* debug section */
-        if (IN != prevIN || OUT != prevOUT || SP != prevSP) {
+        if (IN != prevIN || OUT != prevOUT || SP != prevSP || Z != pZ || N != pN || C != pC) {
             different = true;
         }
         
         prevIN = IN;
         prevOUT = OUT;
         prevSP = SP;
+        pZ = Z;
+        pN = N;
+        pC = C;
         
         for (int i = 0; i < 8; i++) {
             if (dataRegs[i] != prevDataRegs[i]) {
@@ -331,11 +337,13 @@ void MCPU::run() {
             
             ofile << std::setw(2) << std::setfill(' ') << static_cast<int>(IN) << " "; 
             ofile << std::setw(2) << std::setfill(' ') << static_cast<int>(OUT) << "|"; 
+            ofile << static_cast<int>(C) << static_cast<int>(N) << static_cast<int>(Z) << "|";
             ofile << std::setw(4) << std::setfill('0') << static_cast<int>(SP) << " ";
             ofile << std::setw(4) << std::setfill('0') << static_cast<int>(PC) << "|" << std::endl;
             
             different = false;
         }
+        /* end debug section */
         
         cycle++;
     }
