@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h> 
+#include <conio.h>
 
 MCPU::MCPU(uint8_t* memory, uint8_t mode) {
     this->memory = memory;
@@ -255,9 +256,10 @@ void MCPU::execute(uint8_t instr) {
             break;
         case 30: //sti
             dataRegs[reg] = IN;
+            IN = 0; //clear IN after read
             break;
         default: //nop
-            exit(0); //DEBUG ONLY[
+            exit(0); //DEBUG ONLY
             break; 
     }
     
@@ -266,8 +268,21 @@ void MCPU::execute(uint8_t instr) {
     }
 }
 
+void MCPU::setInput(uint8_t input) {
+    this->IN = input;
+}
+
 void MCPU::run() {
+    uint16_t keypress;
+    
     while (1) {
+        if (kbhit()) { //if key is pressed
+            keypress = _getch();
+            if (keypress == 0 || keypress == 224) {
+                keypress = _getch();
+            }
+            setInput(keypress);
+        }
         execute(memory[PC]);
     }
 }

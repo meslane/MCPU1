@@ -4,7 +4,7 @@
 #include <cstdint>
 
 class MCPU {
-    public:
+    private:
         uint8_t* memory; 
         uint8_t mode;
         uint8_t dataRegs[8];
@@ -23,8 +23,9 @@ class MCPU {
         uint8_t ALU(uint8_t a, uint8_t b, uint8_t mode);
         void execute(uint8_t instr);
         
-    //public:
+    public:
         MCPU(uint8_t* memory, uint8_t mode); 
+        void setInput(uint8_t input);
         void run();
 };
 

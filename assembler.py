@@ -80,8 +80,53 @@ escChars = {
 
 labelTable = {} #table for address labels
 
+for l in inData: #pre-assign address labels
+    line = l.lower().split()
+    
+    if (len(line) > 0):
+        #labels
+        if ("label" in line[0]):
+            if (len(line) > 2): #defined address
+                labelTable[line[1]] = int(line[2], 0)
+                dPointer = int(line[2], 0) #update address to label index
+            else: #assumed address
+                labelTable[line[1]] = dPointer
+                
+        #strings
+        if (l[0] == '"' or l[0] == "'"):
+            l = l[1:]
+            for ch in l:
+                if (ch != '"' and ch != "'"):
+                    if (ch != "\\"):
+                        dPointer += 1
+                else:
+                    dPointer += 1
+                    break
+                    
+        #ALU and MOV ops + all ops greater than 25
+        try:
+            if ((instList.index(line[0]) < 16) or (instList.index(line[0]) > 25)):
+                dPointer += 1
+        except ValueError:
+            pass
+            
+        #ldi
+        if (line[0] == "ldi"):
+            dPointer += 2
+            
+        #direct address instructions
+        if (line[0] == "ldd" or line[0] == "std" or line[0] == "jpd" or line[0] == "srd" or line[0] == "lsp"):
+            dPointer += 3
+        
+        #indexed address instructionss
+        if (line[0] == "ldx" or line[0] == "stx" or line[0] == "jpx" or line[0] == "srx"):
+            dPointer += 1
+
+#print(labelTable)
+
 n = 1
-for l in inData:
+dPointer = 0
+for l in inData: #write data
     line = l.lower().split()
     
     if (len(line) > 0):
@@ -101,7 +146,8 @@ for l in inData:
                         outData[dPointer] = escChars[ch]
                         dPointer += 1
                     except KeyError:
-                        pass
+                        outData[dPointer] = ch
+                        dPointer += 1
                     
                     escapeChar = False
                 else:
@@ -128,10 +174,7 @@ for l in inData:
         #address labels
         if ("label" in line[0]):
             if (len(line) > 2): #defined address
-                labelTable[line[1]] = int(line[2], 0)
-                dPointer = int(line[2], 0) #update address to label index
-            else: #assumed address
-                labelTable[line[1]] = dPointer
+                dPointer = labelTable[line[1]] #update address to label index
         
         #nop
         if (line[0] == "nop"):
