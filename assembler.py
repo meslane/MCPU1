@@ -102,6 +102,12 @@ for l in inData: #pre-assign address labels
                 else:
                     dPointer += 1
                     break
+        #ints
+        try:
+            if (int(line[0], 0)):
+                dPointer += 1
+        except ValueError:
+            pass
                     
         #ALU and MOV ops + all ops greater than 25
         try:
@@ -146,7 +152,7 @@ for l in inData: #write data
                         outData[dPointer] = escChars[ch]
                         dPointer += 1
                     except KeyError:
-                        outData[dPointer] = ch
+                        outData[dPointer] = ord(ch)
                         dPointer += 1
                     
                     escapeChar = False
