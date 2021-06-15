@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <conio.h>
+#include <fstream>
+#include <iostream>
+#include <iomanip>
 
 MCPU::MCPU(uint8_t* memory, uint8_t mode) {
     this->memory = memory;
@@ -69,7 +72,7 @@ uint8_t MCPU::ALU(uint8_t a, uint8_t b, uint8_t mode) {
     return result;
 }
 
-void MCPU::execute(uint8_t instr) {
+bool MCPU::execute(uint8_t instr) {
     uint8_t opcode = (instr & 0b11111000) >> 3;
     uint8_t reg = (instr & 0b00000111);
     
@@ -259,13 +262,15 @@ void MCPU::execute(uint8_t instr) {
             IN = 0; //clear IN after read
             break;
         default: //nop
-            exit(0); //DEBUG ONLY
+            return false; //DEBUG ONLY
             break; 
     }
     
     if (!doJump) {
         PC++;
     }
+    
+    return true;
 }
 
 void MCPU::setInput(uint8_t input) {
@@ -273,9 +278,21 @@ void MCPU::setInput(uint8_t input) {
 }
 
 void MCPU::run() {
+    uint64_t cycle = 0;
     uint16_t keypress;
     
-    while (1) {
+    std::ofstream ofile;
+    ofile.open("debug.txt");
+    
+    bool different = false;
+    uint8_t prevDataRegs[8] = {255};
+    uint8_t prevIN = 255; //input register
+    uint8_t prevOUT = 255; //output register
+    uint16_t prevSP = 65535; //call stack pointer
+    
+    bool run = true;
+    ofile << "Cycle     |A |B |C |D |E |F |G |H |IN|OT| SP | PC |" << std::endl;
+    while (run) {
         if (kbhit()) { //if key is pressed
             keypress = _getch();
             if (keypress == 0 || keypress == 224) {
@@ -283,6 +300,45 @@ void MCPU::run() {
             }
             setInput(keypress);
         }
-        execute(memory[PC]);
+        run = execute(memory[PC]);
+        
+        /* debug section */
+        if (IN != prevIN || OUT != prevOUT || SP != prevSP) {
+            different = true;
+        }
+        
+        prevIN = IN;
+        prevOUT = OUT;
+        prevSP = SP;
+        
+        for (int i = 0; i < 8; i++) {
+            if (dataRegs[i] != prevDataRegs[i]) {
+                different = true;
+            }
+            prevDataRegs[i] = dataRegs[i];
+        }
+        
+        if (different) {
+            ofile << std::dec << std::setw(10) << std::setfill('0') << cycle << "|";
+            for (int i = 0; i < 8; i++) { 
+                ofile << std::hex << std::setw(2) << std::setfill(' ') << static_cast<int>(dataRegs[i]);
+                if (i == 7) {
+                    ofile << "|";
+                } else {
+                    ofile << " ";
+                }
+            }
+            
+            ofile << std::setw(2) << std::setfill(' ') << static_cast<int>(IN) << " "; 
+            ofile << std::setw(2) << std::setfill(' ') << static_cast<int>(OUT) << "|"; 
+            ofile << std::setw(4) << std::setfill('0') << static_cast<int>(SP) << " ";
+            ofile << std::setw(4) << std::setfill('0') << static_cast<int>(PC) << "|" << std::endl;
+            
+            different = false;
+        }
+        
+        cycle++;
     }
+    
+    ofile.close();
 }
