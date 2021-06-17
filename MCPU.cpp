@@ -181,8 +181,8 @@ bool MCPU::execute(uint8_t instr) {
         case 23: //srd
             if (doJump) {
                 /* save PC to stack */
-                LSB = (PC | 0xff);
-                MSB = (PC | 0xff00) >> 8;
+                LSB = (PC & 0xff);
+                MSB = (PC & 0xff00) >> 8;
                 
                 memory[SP] = MSB;
                 SP++;
@@ -204,8 +204,8 @@ bool MCPU::execute(uint8_t instr) {
         case 24: //srx
             if (doJump) {
                 /* save PC to stack */
-                LSB = (PC | 0xff);
-                MSB = (PC | 0xff00) >> 8;
+                LSB = (PC & 0xff);
+                MSB = (PC & 0xff00) >> 8;
                 
                 memory[SP] = MSB;
                 SP++;
@@ -237,11 +237,11 @@ bool MCPU::execute(uint8_t instr) {
             break;
         case 28: //ret
             SP--;
-            MSB = memory[SP];
-            SP--;
             LSB = memory[SP];
+            SP--;
+            MSB = memory[SP];
             
-            PC = (MSB << 8) | LSB;
+            PC = ((MSB << 8) | LSB);
             break;
         case 29: //ldo
             OUT = dataRegs[reg];

@@ -1,0 +1,16 @@
+label start 0x0
+lsp 0xfff
+ldi a 64
+psh a 
+psh a 
+pop b 
+pop c
+ldi h 0xf0 
+srx 0
+ldo d
+hcf
+
+label subroutine 0xf0 
+ldi d 64
+ldo d
+ret
